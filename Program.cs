@@ -7,10 +7,11 @@ namespace Graph
 {
     class Graph
     {
-        public Graph(int[] i, int[] j)
+        public Graph(int[] i, int[] j, int[] c)
         {
             I = new List<int>();
             J = new List<int>();
+            C = c.ToList();
 
             H = new List<int>();
             L = new List<int>();
@@ -54,7 +55,7 @@ namespace Graph
             H[i] = L.Count - 1;
         }
 
-        public void Remove(int l)
+        public void RemoveArc(int l)
         {
             I.RemoveAt(l);
             J.RemoveAt(l);   
@@ -63,13 +64,13 @@ namespace Graph
             L.RemoveAt(L.Count - 1);
         }
 
-        public void Remove(int i, int j)
+        public void RemoveArc(int i, int j)
         {
             for (int k = 0; k < I.Count; k++)
             {
                 if (I[k] == i && J[k] == j)
                 {
-                    Remove(k);
+                    RemoveArc(k);
                     break;
                 }
             }
@@ -186,8 +187,77 @@ namespace Graph
             Console.WriteLine();
         }
 
+        public void Dijksta(int v)
+        {
+            var R = new List<int>();
+            var P = new List<int>();
+            var M = C.Max() * I.Count;
+            var B = new List<List<int>>();
+            for(int i = 0; i < M; i++)
+            {
+                B.Add(new List<int>());
+            }
+            for(int i = 0; i < n; i++)
+            {
+                R.Add(int.MaxValue);
+                P.Add(-2);
+            }
+            R[v] = 0;
+            P[v] = -1;
+
+            B[0].Add(v);
+
+            for(int i = 0; i < M; i++)
+            {
+                int b = Get(B, i);
+
+                while (Get(B, i) != -1)
+                {
+                    for (int k = H[i]; k != -1; k = L[k])
+                    {
+                        int j = J[k];
+                        int rj = R[j];
+                        if (R[b] + C[k] < rj)
+                        {
+                            R[j] = R[b] + C[k];
+                            P[j] = k;
+
+                            if (rj != int.MaxValue)
+                            {
+                                Remove(B, j, rj);
+                            }
+                            Insert(B, j, R[j]);
+                        }
+
+                    }
+                }
+            }
+        }
+
+        private int Get(List<List<int>> B, int k)
+        {
+            var i = -1;
+            if (B[k].Count != 0)
+            {
+                i = B[k].First();
+                B[k].RemoveAt(0);
+            }
+            return i;
+        }
+
+        private void Insert(List<List<int>> B, int k, int i)
+        {
+            B[k].Insert(0, i);
+        }
+
+        private void Remove(List<List<int>> B, int k, int i)
+        {
+            B[k].Remove(i);
+        }
+
         private List<int> I;
         private List<int> J;
+        private List<int> C;
         private List<int> H;
         private List<int> L;
         private List<int> K;
@@ -199,13 +269,14 @@ namespace Graph
     {
         static void Main(string[] args)
         {
-            var graph = new Graph(new []{0, 1, 2, 1, 0}, new [] {1, 2, 3, 3, 2});
+            var graph = new Graph(new []{0, 1, 2, 1, 0}, new [] {1, 2, 3, 3, 2}, new[] {1, 3, 1, 4, 5});
             Console.WriteLine();
             graph.Add(4, 5);
             graph.Add(6, 7);
             graph.Print();
-            graph.ConnectComponent();
-            graph.PrintList(graph.BFS(1));
+
+            graph.Dijksta(0);
+            
             Console.ReadKey();
         }
     }
