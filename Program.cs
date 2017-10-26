@@ -141,8 +141,53 @@ namespace Graph
             }
         }
 
-        private static List<int> I;
-        private static List<int> J;
+        public List<int> BFS(int v)
+        {
+            var rang = new List<int>();
+            var P = new List<int>();
+            for (int i = 0; i < I.Count; i++)
+            {
+                rang.Add(-1);
+                P.Add(-1);
+            }
+            var queue = new List<int>();
+
+            queue.Add(v);
+
+            while (queue.Count != 0)
+            {
+                var from = queue.Last();
+                queue.RemoveAt(0);
+
+                for (int i = 0; i < I.Count; i++)
+                {
+                    if (I[i] == from)
+                    {
+                        var to = J[i];
+                        if (rang[to] == -1)
+                        {
+                            queue.Add(to);
+                            rang[to] = rang[from] + 1;
+                            P[to] = from;
+                        }
+                    }
+                }
+
+            }
+            return P;
+        }
+
+        public void PrintList(List<int> list)
+        {
+            foreach (var item in list)
+            {
+                Console.Write("{0} ", item);
+            }
+            Console.WriteLine();
+        }
+
+        private List<int> I;
+        private List<int> J;
         private List<int> H;
         private List<int> L;
         private List<int> K;
@@ -160,6 +205,7 @@ namespace Graph
             graph.Add(6, 7);
             graph.Print();
             graph.ConnectComponent();
+            graph.PrintList(graph.BFS(1));
             Console.ReadKey();
         }
     }
